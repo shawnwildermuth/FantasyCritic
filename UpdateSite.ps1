@@ -1,12 +1,10 @@
 Get-ChildItem C:\FantasyCritic\BuildArea\ -Recurse | Remove-Item -Recurse -Force
 dotnet publish src\FantasyCritic.Web/FantasyCritic.Web.csproj -c Release -o C:\FantasyCritic\BuildArea\
 Write-Output "Running NPM processes"
-cd FantasyCritic.Web\
-cd ClientApp\
+cd src\FantasyCritic.Web\ClientApp\
 npm install
 npm run build
-cd ..
-cd ..
+cd ..\..\..\
 Write-Output "Done running NPM processes"
 Write-Output "Stopping site"
 Stop-Website "FantasyCritic"
