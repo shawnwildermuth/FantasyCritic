@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FantasyCritic.Web.Controllers.API;
 
 [Route("api/[controller]/[action]")]
-[Authorize]
+[Authorize("BasicUser")]
 public class AccountController : FantasyCriticController
 {
     public AccountController(FantasyCriticUserManager userManager) :

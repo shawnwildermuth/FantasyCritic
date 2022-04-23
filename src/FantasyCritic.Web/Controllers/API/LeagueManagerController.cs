@@ -17,7 +17,7 @@ using Microsoft.AspNetCore.SignalR;
 namespace FantasyCritic.Web.Controllers.API;
 
 [Route("api/[controller]/[action]")]
-[Authorize]
+[Authorize("BasicUser")]
 public class LeagueManagerController : BaseLeagueController
 {
     private readonly DraftService _draftService;

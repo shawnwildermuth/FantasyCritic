@@ -24,7 +24,7 @@ using Newtonsoft.Json;
 namespace FantasyCritic.Web.Controllers.API;
 
 [Route("api/[controller]/[action]")]
-[Authorize]
+[Authorize("BasicUser")]
 public class LeagueController : BaseLeagueController
 {
     private readonly DraftService _draftService;
@@ -501,7 +501,7 @@ public class LeagueController : BaseLeagueController
     }
 
     [HttpPost]
-    [Authorize(Roles = "PlusUser")]
+    [Authorize("PlusUser")]
     public async Task<IActionResult> ChangePublisherIcon([FromBody] ChangePublisherIconRequest request)
     {
         var publisherRecord = await GetExistingLeagueYearAndPublisher(request.PublisherID, ActionProcessingModeBehavior.Allow, RequiredRelationship.BePublisher, RequiredYearStatus.Any);

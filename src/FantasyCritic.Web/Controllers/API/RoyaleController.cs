@@ -13,7 +13,7 @@ using FantasyCritic.Web.Models.Responses.Royale;
 namespace FantasyCritic.Web.Controllers.API;
 
 [Route("api/[controller]/[action]")]
-[Authorize]
+[Authorize("BasicUser")]
 public class RoyaleController : FantasyCriticController
 {
     private readonly IClock _clock;

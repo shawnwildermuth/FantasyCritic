@@ -104,7 +104,7 @@ public class GameController : FantasyCriticController
     }
 
     [HttpGet("{year}")]
-    [Authorize(Roles = "PlusUser")]
+    [Authorize("PlusUser")]
     public async Task<ActionResult<List<PossibleMasterGameYearViewModel>>> MasterGameYearInLeagueContext(int year, Guid leagueID)
     {
         var currentUserResult = await GetCurrentUser();
@@ -133,7 +133,7 @@ public class GameController : FantasyCriticController
     }
 
     [HttpPost]
-    [Authorize]
+    [Authorize("BasicUser")]
     public async Task<IActionResult> CreateMasterGameRequest([FromBody] MasterGameRequestRequest request)
     {
         var currentUserResult = await GetCurrentUser();
@@ -151,7 +151,7 @@ public class GameController : FantasyCriticController
     }
 
     [HttpPost]
-    [Authorize]
+    [Authorize("BasicUser")]
     public async Task<IActionResult> CreateMasterGameChangeRequest([FromBody] MasterGameChangeRequestRequest request)
     {
         var currentUserResult = await GetCurrentUser();
@@ -173,7 +173,7 @@ public class GameController : FantasyCriticController
     }
 
     [HttpPost]
-    [Authorize]
+    [Authorize("BasicUser")]
     public async Task<IActionResult> DeleteMasterGameRequest([FromBody] MasterGameRequestDeletionRequest request)
     {
         var currentUserResult = await GetCurrentUser();
@@ -200,7 +200,7 @@ public class GameController : FantasyCriticController
     }
 
     [HttpPost]
-    [Authorize]
+    [Authorize("BasicUser")]
     public async Task<IActionResult> DeleteMasterGameChangeRequest([FromBody] MasterGameChangeRequestDeletionRequest request)
     {
         var currentUserResult = await GetCurrentUser();
@@ -227,7 +227,7 @@ public class GameController : FantasyCriticController
     }
 
     [HttpPost]
-    [Authorize]
+    [Authorize("BasicUser")]
     public async Task<IActionResult> DismissMasterGameRequest([FromBody] MasterGameRequestDismissRequest request)
     {
         var currentUserResult = await GetCurrentUser();
@@ -254,7 +254,7 @@ public class GameController : FantasyCriticController
     }
 
     [HttpPost]
-    [Authorize]
+    [Authorize("BasicUser")]
     public async Task<IActionResult> DismissMasterGameChangeRequest([FromBody] MasterGameChangeRequestDismissRequest request)
     {
         var currentUserResult = await GetCurrentUser();
@@ -280,7 +280,7 @@ public class GameController : FantasyCriticController
         return Ok();
     }
 
-    [Authorize]
+    [Authorize("BasicUser")]
     public async Task<ActionResult<List<MasterGameRequestViewModel>>> MyMasterGameRequests()
     {
         var currentUserResult = await GetCurrentUser();
@@ -297,7 +297,7 @@ public class GameController : FantasyCriticController
         return viewModels;
     }
 
-    [Authorize]
+    [Authorize("BasicUser")]
     public async Task<ActionResult<List<MasterGameChangeRequestViewModel>>> MyMasterGameChangeRequests()
     {
         var currentUserResult = await GetCurrentUser();

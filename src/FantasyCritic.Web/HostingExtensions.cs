@@ -1,5 +1,6 @@
 
 using System.IO;
+using Duende.IdentityServer;
 using FantasyCritic.AWS;
 using FantasyCritic.Lib.DependencyInjection;
 using FantasyCritic.Lib.GG;
@@ -15,6 +16,7 @@ using FantasyCritic.MySQL;
 using FantasyCritic.Web.Hubs;
 using FantasyCritic.Web.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -143,6 +145,39 @@ public static class HostingExtensions
             args.SetObserved();
         });
 
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("BasicUser", policy =>
+            {
+                policy.AddAuthenticationSchemes(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    IdentityServerConstants.DefaultCookieAuthenticationScheme,
+                    JwtBearerDefaults.AuthenticationScheme);
+                policy.RequireAuthenticatedUser();
+                policy.RequireClaim("scope", IdentityServerConstants.LocalApi.ScopeName);
+            });
+            options.AddPolicy("PlusUser", policy =>
+            {
+                policy.AddAuthenticationSchemes(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    IdentityServerConstants.DefaultCookieAuthenticationScheme,
+                    JwtBearerDefaults.AuthenticationScheme);
+                policy.RequireAuthenticatedUser();
+                policy.RequireRole("PlusUser");
+                policy.RequireClaim("scope", IdentityServerConstants.LocalApi.ScopeName);
+            });
+            options.AddPolicy("Admin", policy =>
+            {
+                policy.AddAuthenticationSchemes(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    IdentityServerConstants.DefaultCookieAuthenticationScheme,
+                    JwtBearerDefaults.AuthenticationScheme);
+                policy.RequireAuthenticatedUser();
+                policy.RequireRole("Admin");
+                policy.RequireClaim("scope", IdentityServerConstants.LocalApi.ScopeName);
+            });
+        });
+
         services.AddIdentity<FantasyCriticUser, FantasyCriticRole>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
@@ -192,34 +227,43 @@ public static class HostingExtensions
                options.ExpireTimeSpan = TimeSpan.FromDays(30);
                options.SlidingExpiration = true; // the cookie would be re-issued on any request half way through the ExpireTimeSpan
             })
-           .AddLocalApi()
-           .AddGoogle(options =>
-           {
+            .AddLocalApi(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.ExpectedScope = IdentityServerConstants.LocalApi.ScopeName;
+            })
+            .AddGoogle(options =>
+            {
                options.ClientId = configuration["Authentication:Google:ClientId"];
                options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
-           })
-           .AddMicrosoftAccount(microsoftOptions =>
-           {
+            })
+            .AddMicrosoftAccount(microsoftOptions =>
+            {
                microsoftOptions.AuthorizationEndpoint = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
                microsoftOptions.TokenEndpoint = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
                microsoftOptions.ClientId = configuration["Authentication:Microsoft:ClientId"];
                microsoftOptions.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"];
-           })
-           .AddTwitch(options =>
-           {
+            })
+            .AddTwitch(options =>
+            {
                options.ClientId = configuration["Authentication:Twitch:ClientId"];
                options.ClientSecret = configuration["Authentication:Twitch:ClientSecret"];
-           })
-           .AddPatreon(options =>
-           {
+            })
+            .AddPatreon(options =>
+            {
                options.ClientId = configuration["Authentication:Patreon:ClientId"];
                options.ClientSecret = configuration["Authentication:Patreon:ClientSecret"];
-           })
-           .AddDiscord(options =>
-           {
+            })
+            .AddDiscord(options =>
+            {
                options.ClientId = configuration["Authentication:Discord:ClientId"];
                options.ClientSecret = configuration["Authentication:Discord:ClientSecret"];
-           });
+            })
+            //.AddJwtBearer(options =>
+            //{
+            //    // Add other options to validate the JWT
+            //    options.TokenValidationParameters.ValidTypes = new[] { "at+jwt" };
+            //})
+            ;
 
         var keysFolder = Path.Combine(rootFolder, "Keys");
         services.AddDataProtection()
