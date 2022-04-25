@@ -149,32 +149,23 @@ public static class HostingExtensions
         {
             options.AddPolicy("BasicUser", policy =>
             {
-                policy.AddAuthenticationSchemes(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    IdentityServerConstants.DefaultCookieAuthenticationScheme,
-                    JwtBearerDefaults.AuthenticationScheme);
+                //policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
                 policy.RequireAuthenticatedUser();
-                policy.RequireClaim("scope", IdentityServerConstants.LocalApi.ScopeName);
+                //policy.RequireClaim("scope", IdentityServerConstants.LocalApi.ScopeName);
             });
             options.AddPolicy("PlusUser", policy =>
             {
-                policy.AddAuthenticationSchemes(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    IdentityServerConstants.DefaultCookieAuthenticationScheme,
-                    JwtBearerDefaults.AuthenticationScheme);
+                //policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
                 policy.RequireAuthenticatedUser();
                 policy.RequireRole("PlusUser");
-                policy.RequireClaim("scope", IdentityServerConstants.LocalApi.ScopeName);
+                //policy.RequireClaim("scope", IdentityServerConstants.LocalApi.ScopeName);
             });
             options.AddPolicy("Admin", policy =>
             {
-                policy.AddAuthenticationSchemes(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    IdentityServerConstants.DefaultCookieAuthenticationScheme,
-                    JwtBearerDefaults.AuthenticationScheme);
+                //policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
                 policy.RequireAuthenticatedUser();
                 policy.RequireRole("Admin");
-                policy.RequireClaim("scope", IdentityServerConstants.LocalApi.ScopeName);
+                //policy.RequireClaim("scope", IdentityServerConstants.LocalApi.ScopeName);
             });
         });
 
@@ -232,6 +223,10 @@ public static class HostingExtensions
             {
                 options.ExpectedScope = IdentityServerConstants.LocalApi.ScopeName;
             })
+            //.AddLocalApi(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+            //{
+            //    options.ExpectedScope = IdentityServerConstants.LocalApi.ScopeName;
+            //})
             .AddGoogle(options =>
             {
                options.ClientId = configuration["Authentication:Google:ClientId"];
