@@ -1,6 +1,7 @@
 
 using System.IO;
 using Duende.IdentityServer;
+using Duende.IdentityServer.Hosting.LocalApiAuthentication;
 using FantasyCritic.AWS;
 using FantasyCritic.Lib.DependencyInjection;
 using FantasyCritic.Lib.GG;
@@ -13,10 +14,12 @@ using FantasyCritic.Lib.Scheduling.Lib;
 using FantasyCritic.Lib.Services;
 using FantasyCritic.Mailgun;
 using FantasyCritic.MySQL;
+using FantasyCritic.Web.AuthorizationHandlers;
 using FantasyCritic.Web.Hubs;
 using FantasyCritic.Web.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -147,26 +150,13 @@ public static class HostingExtensions
 
         builder.Services.AddAuthorization(options =>
         {
-            options.AddPolicy("BasicUser", policy =>
-            {
-                //policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
-                policy.RequireAuthenticatedUser();
-                //policy.RequireClaim("scope", IdentityServerConstants.LocalApi.ScopeName);
-            });
-            options.AddPolicy("PlusUser", policy =>
-            {
-                //policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
-                policy.RequireAuthenticatedUser();
-                policy.RequireRole("PlusUser");
-                //policy.RequireClaim("scope", IdentityServerConstants.LocalApi.ScopeName);
-            });
-            options.AddPolicy("Admin", policy =>
-            {
-                //policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
-                policy.RequireAuthenticatedUser();
-                policy.RequireRole("Admin");
-                //policy.RequireClaim("scope", IdentityServerConstants.LocalApi.ScopeName);
-            });
+            var bldr = new AuthorizationPolicyBuilder();
+            bldr.AuthenticationSchemes.Add(IdentityConstants.ApplicationScheme);
+            bldr.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
+            bldr.RequireAuthenticatedUser();
+
+            options.DefaultPolicy = bldr.Build();
+
         });
 
         services.AddIdentity<FantasyCriticUser, FantasyCriticRole>(options =>
@@ -213,52 +203,63 @@ public static class HostingExtensions
         services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
             {
-               options.Cookie.Name = "FantasyCriticCookie";
-               options.LoginPath = "/Identity/Account/Login";
-               options.LogoutPath = "/Identity/Account/Logout";
-               options.ExpireTimeSpan = TimeSpan.FromDays(30);
-               options.SlidingExpiration = true; // the cookie would be re-issued on any request half way through the ExpireTimeSpan
-            })
-            .AddLocalApi(JwtBearerDefaults.AuthenticationScheme, options =>
-            {
-                options.ExpectedScope = IdentityServerConstants.LocalApi.ScopeName;
-            })
-            //.AddLocalApi(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-            //{
-            //    options.ExpectedScope = IdentityServerConstants.LocalApi.ScopeName;
-            //})
-            .AddGoogle(options =>
-            {
-               options.ClientId = configuration["Authentication:Google:ClientId"];
-               options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
-            })
-            .AddMicrosoftAccount(microsoftOptions =>
-            {
-               microsoftOptions.AuthorizationEndpoint = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
-               microsoftOptions.TokenEndpoint = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
-               microsoftOptions.ClientId = configuration["Authentication:Microsoft:ClientId"];
-               microsoftOptions.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"];
-            })
-            .AddTwitch(options =>
-            {
-               options.ClientId = configuration["Authentication:Twitch:ClientId"];
-               options.ClientSecret = configuration["Authentication:Twitch:ClientSecret"];
-            })
-            .AddPatreon(options =>
-            {
-               options.ClientId = configuration["Authentication:Patreon:ClientId"];
-               options.ClientSecret = configuration["Authentication:Patreon:ClientSecret"];
-            })
-            .AddDiscord(options =>
-            {
-               options.ClientId = configuration["Authentication:Discord:ClientId"];
-               options.ClientSecret = configuration["Authentication:Discord:ClientSecret"];
+                options.Cookie.Name = "FantasyCriticCookie";
+                options.LoginPath = "/Account/Login";
+                options.LogoutPath = "/Account/Logout";
+                options.ExpireTimeSpan = TimeSpan.FromDays(30);
+                options.SlidingExpiration = true; // the cookie would be re-issued on any request half way through the ExpireTimeSpan
             })
             //.AddJwtBearer(options =>
             //{
             //    // Add other options to validate the JWT
             //    options.TokenValidationParameters.ValidTypes = new[] { "at+jwt" };
+
+            //    options.Events = new JwtBearerEvents()
+            //    {
+            //        OnAuthenticationFailed = ctx =>
+            //        {
+            //            return Task.CompletedTask;
+            //        },
+            //        OnTokenValidated = ctx =>
+            //        {
+            //            return Task.CompletedTask;
+            //        }
+
+            //    };
             //})
+            .AddLocalApi(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.ExpectedScope = IdentityServerConstants.LocalApi.ScopeName;
+            })
+            //.AddLocalApi()
+
+            //.AddGoogle(options =>
+            //{
+            //   options.ClientId = configuration["Authentication:Google:ClientId"];
+            //   options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
+            //})
+            .AddMicrosoftAccount(microsoftOptions =>
+            {
+                microsoftOptions.AuthorizationEndpoint = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
+                microsoftOptions.TokenEndpoint = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
+                microsoftOptions.ClientId = configuration["Authentication:Microsoft:ClientId"];
+                microsoftOptions.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"];
+            })
+            .AddTwitch(options =>
+            {
+                options.ClientId = configuration["Authentication:Twitch:ClientId"];
+                options.ClientSecret = configuration["Authentication:Twitch:ClientSecret"];
+            })
+            .AddPatreon(options =>
+            {
+                options.ClientId = configuration["Authentication:Patreon:ClientId"];
+                options.ClientSecret = configuration["Authentication:Patreon:ClientSecret"];
+            })
+            .AddDiscord(options =>
+            {
+                options.ClientId = configuration["Authentication:Discord:ClientId"];
+                options.ClientSecret = configuration["Authentication:Discord:ClientSecret"];
+            })
             ;
 
         var keysFolder = Path.Combine(rootFolder, "Keys");
@@ -292,6 +293,9 @@ public static class HostingExtensions
         {
             staticFileOptions.RootPath = GetSPAPath(env);
         });
+
+        // Only in Development, used for debugging
+        builder.Services.AddTransient<IAuthorizationHandler, FantasyCriticAuthorizationHandler>();
 
         return builder.Build();
     }
@@ -337,7 +341,6 @@ public static class HostingExtensions
         }
 
         app.UseRouting();
-        app.UseAuthentication();
         app.UseIdentityServer();
         app.UseAuthorization();
 

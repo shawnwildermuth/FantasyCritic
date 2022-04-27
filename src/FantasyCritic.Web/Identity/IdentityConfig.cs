@@ -9,7 +9,7 @@ public class IdentityConfig
         new IdentityResource[]
         {
             new IdentityResources.OpenId(),
-            new IdentityResources.Profile(),
+            new IdentityResources.Profile()
         };
 
     public static IEnumerable<ApiResource> APIResources = new List<ApiResource>
@@ -21,7 +21,8 @@ public class IdentityConfig
     public static IEnumerable<ApiScope> APIScopes =>
         new ApiScope[]
         {
-            new ApiScope(IdentityServerConstants.LocalApi.ScopeName),
+            // Added name to be sure that name is added to the JWT
+            new ApiScope(IdentityServerConstants.LocalApi.ScopeName, new [] { "name" }),
         };
 
     public IdentityConfig(string baseAddress, string mvcSecret, string interactiveSecret, string keyName)
